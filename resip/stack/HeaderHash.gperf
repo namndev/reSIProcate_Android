@@ -122,5 +122,11 @@ p-charging-vector, Headers::PChargingVector
 p-charging-function-addresses, Headers::PChargingFunctionAddresses
 p-visited-network-id, Headers::PVisitedNetworkID
 user-to-user, Headers::UserToUser
+x-message-composing-info, Headers::XMessageComposingInfo
+x-push-os, Headers::XPushOS
+x-push-deviceid, Headers::XPushDeviceID
+x-push-token, Headers::XPushToken
+x-messagetype, Headers::XMessageType
+x-message-uuid, Headers::XMessageUUID
 %%
 }

@@ -202,11 +202,16 @@ typedef ParserContainer<NameAddr> NameAddrs;
 defineMultiHeader(RecordRoute, "Record-Route", NameAddr, "RFC 3261");
 defineMultiHeader(Route, "Route", NameAddr, "RFC 3261");
 defineMultiHeader(Contact, "Contact", NameAddr, "RFC 3261");
+//SIGMA
+defineMultiHeader(XAlias, "X-Alias", NameAddr, "Madman");
+defineHeader(XCurrentAlias, "X-CurrentAlias", NameAddr, "Madman");
+// END
 defineHeader(From, "From", NameAddr, "RFC 3261");
 defineHeader(To, "To", NameAddr, "RFC 3261"); 
 defineHeader(ReplyTo, "Reply-To", NameAddr, "RFC 3261");
 defineHeader(ReferTo, "Refer-To", NameAddr, "RFC 3515");
 defineHeader(ReferredBy, "Referred-By", NameAddr, "RFC 3892");
+defineHeader(XOfflineSecond, "X-Offline-Seconds",  UInt32Category, "Qilex"); // MADMAN: add header for user offline second
 
 defineMultiHeader(Path, "Path", NameAddr, "RFC 3327");
 defineMultiHeader(AcceptContact, "Accept-Contact", NameAddr, "RFC 3841");
@@ -243,7 +248,14 @@ defineHeader(Server, "Server", StringCategory, "RFC 3261");
 defineHeader(Subject, "Subject", StringCategory, "RFC 3261");
 defineHeader(UserAgent, "User-Agent", StringCategory, "RFC 3261");
 defineHeader(Timestamp, "Timestamp", StringCategory, "RFC 3261");
-
+// SIGMA
+defineHeader(XAuthenticate, "X-Authenticate", StringCategory, "Madman");
+defineHeader(XMessageComposingInfo, "X-Message-Composing-Info",  StringCategory, "Madman");
+defineHeader(XPushOS, "X-Push-OS",  StringCategory, "Madman");
+defineHeader(XPushDeviceID, "X-Push-DeviceID",  StringCategory, "Madman");
+defineHeader(XPushToken, "X-Push-Token",  StringCategory, "Madman");
+defineHeader(XMessageType, "X-MessageType",  StringCategory, "Madman");
+defineHeader(XMessageUUID, "X-Message-UUID",  StringCategory, "Madman");
 //====================
 // Integer:
 //====================

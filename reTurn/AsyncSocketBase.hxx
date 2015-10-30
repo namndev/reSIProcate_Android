@@ -25,7 +25,7 @@ class AsyncSocketBase :
    public boost::enable_shared_from_this<AsyncSocketBase>
 {
 public:
-   AsyncSocketBase(asio::io_service& ioService);
+   AsyncSocketBase(boost::asio::io_service& ioService);
    virtual ~AsyncSocketBase();
 
    virtual unsigned int getSocketDescriptor() = 0;
@@ -33,7 +33,7 @@ public:
    virtual void registerAsyncSocketBaseHandler(AsyncSocketBaseHandler* handler) { mAsyncSocketBaseHandler = handler; }
 
    /// Note:  The following API's are thread safe and queue the request to be handled by the ioService thread
-   virtual asio::error_code bind(const asio::ip::address& address, unsigned short port) = 0;
+   virtual boost::system::error_code bind(const boost::asio::ip::address& address, unsigned short port) = 0;
    virtual void connect(const std::string& address, unsigned short port) = 0;  
    /// Note: destination is ignored for TCP and TLS connections
    virtual void send(const StunTuple& destination, boost::shared_ptr<DataBuffer>& data);  // Send unframed data
@@ -44,7 +44,7 @@ public:
    virtual void close();
 
    bool isConnected() { return mConnected; }
-   asio::ip::address& getConnectedAddress() { return mConnectedAddress; }
+   boost::asio::ip::address& getConnectedAddress() { return mConnectedAddress; }
    unsigned short getConnectedPort() { return mConnectedPort; }
 
    virtual void setOnBeforeSocketClosedFp(boost::function<void(unsigned int)> fp) { mOnBeforeSocketCloseFp = fp; }
@@ -57,11 +57,11 @@ public:
 
    /// Class override callbacks
    virtual void onConnectSuccess() { resip_assert(false); }
-   virtual void onConnectFailure(const asio::error_code& e) { resip_assert(false); }
-   virtual void onReceiveSuccess(const asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data) = 0;
-   virtual void onReceiveFailure(const asio::error_code& e) = 0;
+   virtual void onConnectFailure(const boost::system::error_code& e) { resip_assert(false); }
+   virtual void onReceiveSuccess(const boost::asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data) = 0;
+   virtual void onReceiveFailure(const boost::system::error_code& e) = 0;
    virtual void onSendSuccess() = 0;
-   virtual void onSendFailure(const asio::error_code& e) = 0;
+   virtual void onSendFailure(const boost::system::error_code& e) = 0;
 
    /// Utility API
    static boost::shared_ptr<DataBuffer> allocateBuffer(unsigned int size);
@@ -70,27 +70,27 @@ public:
    // to be in the base class all revolves around the shared_from_this() use/requirement
    virtual void start() { resip_assert(false); }
    virtual void stop() { resip_assert(false); }
-   virtual void handleReadHeader(const asio::error_code& e) { resip_assert(false); }
-   virtual void handleServerHandshake(const asio::error_code& e) { resip_assert(false); }
-   virtual void handleTcpResolve(const asio::error_code& ec, asio::ip::tcp::resolver::iterator endpoint_iterator) { resip_assert(false); }
-   virtual void handleUdpResolve(const asio::error_code& ec, asio::ip::udp::resolver::iterator endpoint_iterator) { resip_assert(false); }
-   virtual void handleConnect(const asio::error_code& ec, asio::ip::tcp::resolver::iterator endpoint_iterator) { resip_assert(false); }
-   virtual void handleClientHandshake(const asio::error_code& ec, asio::ip::tcp::resolver::iterator endpoint_iterator) { resip_assert(false); }
+   virtual void handleReadHeader(const boost::system::error_code& e) { resip_assert(false); }
+   virtual void handleServerHandshake(const boost::system::error_code& e) { resip_assert(false); }
+   virtual void handleTcpResolve(const boost::system::error_code& ec, boost::asio::ip::tcp::resolver::iterator endpoint_iterator) { resip_assert(false); }
+   virtual void handleUdpResolve(const boost::system::error_code& ec, boost::asio::ip::udp::resolver::iterator endpoint_iterator) { resip_assert(false); }
+   virtual void handleConnect(const boost::system::error_code& ec, boost::asio::ip::tcp::resolver::iterator endpoint_iterator) { resip_assert(false); }
+   virtual void handleClientHandshake(const boost::system::error_code& ec, boost::asio::ip::tcp::resolver::iterator endpoint_iterator) { resip_assert(false); }
 
 protected:
    /// Handle completion of a sendData operation.
-   virtual void handleSend(const asio::error_code& e);
-   virtual void handleReceive(const asio::error_code& e, std::size_t bytesTransferred);
+   virtual void handleSend(const boost::system::error_code& e);
+   virtual void handleReceive(const boost::system::error_code& e, std::size_t bytesTransferred);
 
    /// The io_service used to perform asynchronous operations.
-   asio::io_service& mIOService;
+   boost::asio::io_service& mIOService;
 
    /// Receive Buffer and state
    boost::shared_ptr<DataBuffer> mReceiveBuffer;
    bool mReceiving;
 
    /// Connected Info and State
-   asio::ip::address mConnectedAddress;
+   boost::asio::ip::address mConnectedAddress;
    unsigned short mConnectedPort;
    bool mConnected;
 
@@ -102,12 +102,12 @@ protected:
    boost::function<void(unsigned int)> mOnBeforeSocketCloseFp;
 
 private:
-   virtual void transportSend(const StunTuple& destination, std::vector<asio::const_buffer>& buffers) = 0;
+   virtual void transportSend(const StunTuple& destination, std::vector<boost::asio::const_buffer>& buffers) = 0;
    virtual void transportReceive() = 0;
    virtual void transportFramedReceive() = 0;
    virtual void transportClose() = 0;
 
-   virtual const asio::ip::address getSenderEndpointAddress() = 0;
+   virtual const boost::asio::ip::address getSenderEndpointAddress() = 0;
    virtual unsigned short getSenderEndpointPort() = 0;
 
    virtual void sendFirstQueuedData();

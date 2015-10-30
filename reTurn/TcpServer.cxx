@@ -8,7 +8,7 @@
 
 namespace reTurn {
 
-TcpServer::TcpServer(asio::io_service& ioService, RequestHandler& requestHandler, const asio::ip::address& address, unsigned short port)
+TcpServer::TcpServer(boost::asio::io_service& ioService, RequestHandler& requestHandler, const boost::asio::ip::address& address, unsigned short port)
 : mIOService(ioService),
   mAcceptor(ioService),
   mConnectionManager(),
@@ -16,15 +16,15 @@ TcpServer::TcpServer(asio::io_service& ioService, RequestHandler& requestHandler
   mRequestHandler(requestHandler)
 {
    // Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
-   asio::ip::tcp::endpoint endpoint(address, port);
+	boost::asio::ip::tcp::endpoint endpoint(address, port);
 
    mAcceptor.open(endpoint.protocol());
-   mAcceptor.set_option(asio::ip::tcp::acceptor::reuse_address(true));
+   mAcceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
 #ifdef USE_IPV6
 #ifdef __linux__
    if(address.is_v6())
    {
-      asio::ip::v6_only v6_opt(true);
+	   boost::asio::ip::v6_only v6_opt(true);
       mAcceptor.set_option(v6_opt);
    }
 #endif
@@ -38,27 +38,27 @@ TcpServer::TcpServer(asio::io_service& ioService, RequestHandler& requestHandler
 void 
 TcpServer::start()
 {
-   mAcceptor.async_accept(((TcpConnection*)mNewConnection.get())->socket(), boost::bind(&TcpServer::handleAccept, this, asio::placeholders::error));
+   mAcceptor.async_accept(((TcpConnection*)mNewConnection.get())->socket(), boost::bind(&TcpServer::handleAccept, this, boost::asio::placeholders::error));
 }
 
 void 
-TcpServer::handleAccept(const asio::error_code& e)
+TcpServer::handleAccept(const boost::system::error_code& e)
 {
    if (!e)
    {
       mConnectionManager.start(mNewConnection);
 
       mNewConnection.reset(new TcpConnection(mIOService, mConnectionManager, mRequestHandler));
-      mAcceptor.async_accept(((TcpConnection*)mNewConnection.get())->socket(), boost::bind(&TcpServer::handleAccept, this, asio::placeholders::error));
+      mAcceptor.async_accept(((TcpConnection*)mNewConnection.get())->socket(), boost::bind(&TcpServer::handleAccept, this, boost::asio::placeholders::error));
    }
    else
    {
       ErrLog(<< "Error in handleAccept: " << e.value() << "-" << e.message());
-      if(e == asio::error::no_descriptors)
+      if(e == boost::asio::error::no_descriptors)
       {
          // Retry if too many open files (ie. out of socket descriptors)
          mNewConnection.reset(new TcpConnection(mIOService, mConnectionManager, mRequestHandler));
-         mAcceptor.async_accept(((TcpConnection*)mNewConnection.get())->socket(), boost::bind(&TcpServer::handleAccept, this, asio::placeholders::error));
+         mAcceptor.async_accept(((TcpConnection*)mNewConnection.get())->socket(), boost::bind(&TcpServer::handleAccept, this, boost::asio::placeholders::error));
       }
    }
 }

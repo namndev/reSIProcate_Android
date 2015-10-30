@@ -388,11 +388,14 @@ class SipMessage : public TransactionMessage
       defineMultiHeader(RecordRoute, "Record-Route", NameAddr, "RFC 3261");
       defineMultiHeader(Route, "Route", NameAddr, "RFC 3261");
       defineMultiHeader(Contact, "Contact", NameAddr, "RFC 3261");
+      defineMultiHeader(XAlias, "X-Alias", NameAddr, "Qilex");
+      defineHeader(XCurrentAlias, "X-CurrentAlias", NameAddr, "Qilex");
       defineHeader(From, "From", NameAddr, "RFC 3261");
       defineHeader(To, "To", NameAddr, "RFC 3261");
       defineHeader(ReplyTo, "Reply-To", NameAddr, "RFC 3261");
       defineHeader(ReferTo, "Refer-To", NameAddr, "RFC 3515");
       defineHeader(ReferredBy, "Referred-By", NameAddr, "RFC 3892");
+      defineHeader(XOfflineSecond, "X-Offline-Seconds",  UInt32Category, "Qilex"); // HIEPLM: add header for user offline second
       defineMultiHeader(Path, "Path", NameAddr, "RFC 3327");
       defineMultiHeader(AcceptContact, "Accept-Contact", NameAddr, "RFC 3841");
       defineMultiHeader(RejectContact, "Reject-Contact", NameAddr, "RFC 3841");
@@ -417,6 +420,13 @@ class SipMessage : public TransactionMessage
       defineHeader(Subject, "Subject", StringCategory, "RFC 3261");
       defineHeader(UserAgent, "User-Agent", StringCategory, "RFC 3261");
       defineHeader(Timestamp, "Timestamp", StringCategory, "RFC 3261");
+      defineHeader(XAuthenticate, "X-Authenticate", StringCategory, "Qilex");	//QILEX
+      defineHeader(XMessageComposingInfo, "X-Message-Composing-Info",  StringCategory, "Qilex");
+      defineHeader(XPushOS, "X-Push-OS",  StringCategory, "Qilex");
+      defineHeader(XPushDeviceID, "X-Push-DeviceID",  StringCategory, "Qilex");
+      defineHeader(XPushToken, "X-Push-Token",  StringCategory, "Qilex");
+      defineHeader(XMessageType, "X-MessageType",  StringCategory, "Qilex");
+      defineHeader(XMessageUUID, "X-Message-UUID",  StringCategory, "Qilex");
 
       defineHeader(ContentLength, "Content-Length", UInt32Category, "RFC 3261");
       defineHeader(MaxForwards, "Max-Forwards", UInt32Category, "RFC 3261");

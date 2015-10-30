@@ -9,11 +9,8 @@
 #ifdef USE_SSL
 #include <asio/ssl.hpp>
 #endif
-#ifdef WIN32
+
 #include <srtp.h>
-#else
-#include <srtp/srtp.h>
-#endif
 
 #include "dtls_wrapper/DtlsFactory.hxx"
 #include "Flow.hxx"
@@ -59,12 +56,16 @@ public:
       SRTP_AES_CM_128_HMAC_SHA1_80
    };
 
-   MediaStream(asio::io_service& ioService,
-               asio::ssl::context& sslContext,
+   MediaStream(boost::asio::io_service& ioService,
+#ifdef USE_SSL
+		   boost::asio::ssl::context& sslContext,
+#endif
                MediaStreamHandler& mediaStreamHandler,
                const StunTuple& localRtpBinding, 
                const StunTuple& localRtcpBinding,   // pass in transport type = None to disable RTCP
+#if 0
                dtls::DtlsFactory* dtlsFactory = 0,
+#endif
                NatTraversalMode natTraversalMode = NoNatTraversal,
                const char* natTraversalServerHostname = 0, 
                unsigned short natTraversalServerPort = 0, 
@@ -83,7 +84,9 @@ protected:
    friend class Flow;
 
    // SRTP members
+#ifdef USE_SSL
    dtls::DtlsFactory* mDtlsFactory;
+#endif
    volatile bool mSRTPSessionInCreated;
    volatile bool mSRTPSessionOutCreated;
    resip::Mutex mMutex;

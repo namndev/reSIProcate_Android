@@ -57,11 +57,13 @@ TlsBaseTransport::TlsBaseTransport(Fifo<TransactionMessage>& fifo,
       {
       case SecurityTypes::SSLv23:
          DebugLog(<<"Using SSLv23_method");
-         mDomainCtx = mSecurity->createDomainCtx(SSLv23_method(), sipDomain, certificateFilename, privateKeyFilename, privateKeyPassPhrase);
+//         mDomainCtx = mSecurity->createDomainCtx(SSLv23_method(), sipDomain, certificateFilename, privateKeyFilename, privateKeyPassPhrase);
+         mDomainCtx = mSecurity->createDomainCtx(SSLv23_method(), sipDomain);
          break;
       case SecurityTypes::TLSv1:
          DebugLog(<<"Using TLSv1_method");
-         mDomainCtx = mSecurity->createDomainCtx(TLSv1_method(), sipDomain, certificateFilename, privateKeyFilename, privateKeyPassPhrase);
+//         mDomainCtx = mSecurity->createDomainCtx(TLSv1_method(), sipDomain, certificateFilename, privateKeyFilename, privateKeyPassPhrase);
+         mDomainCtx = mSecurity->createDomainCtx(TLSv1_method(), sipDomain);
          break;
       default:
          throw invalid_argument("Unrecognised SecurityTypes::SSLType value");

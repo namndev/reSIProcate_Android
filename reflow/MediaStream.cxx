@@ -22,14 +22,14 @@ using namespace std;
 
 #define RESIPROCATE_SUBSYSTEM FlowManagerSubsystem::FLOWMANAGER
 
-MediaStream::MediaStream(asio::io_service& ioService,
+MediaStream::MediaStream(boost::asio::io_service& ioService,
 #ifdef USE_SSL
-                         asio::ssl::context& sslContext,
+						 boost::asio::ssl::context& sslContext,
 #endif
                          MediaStreamHandler& mediaStreamHandler,
                          const StunTuple& localRtpBinding, 
                          const StunTuple& localRtcpBinding, 
-#ifdef USE_SSL
+#if 0//#ifdef USE_SSL
                          DtlsFactory* dtlsFactory,
 #endif 
                          NatTraversalMode natTraversalMode,
@@ -37,7 +37,7 @@ MediaStream::MediaStream(asio::io_service& ioService,
                          unsigned short natTraversalServerPort, 
                          const char* stunUsername,
                          const char* stunPassword) :
-#ifdef USE_SSL
+#if 0//#ifdef USE_SSL
    mDtlsFactory(dtlsFactory),
 #endif  
    mSRTPSessionInCreated(false),

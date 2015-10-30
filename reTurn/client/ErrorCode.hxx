@@ -1,7 +1,7 @@
 #ifndef ERRORCODE_HXX
 #define ERRORCODE_HXX
 
-#include <asio/error_code.hpp>
+#include <system/error_code.hpp>
 
 namespace reTurn {
 

@@ -14,10 +14,10 @@ namespace reTurn {
 class TurnManager
 {
 public:
-   explicit TurnManager(asio::io_service& ioService, const ReTurnConfig& config);  // ioService used to start timers
+   explicit TurnManager(boost::asio::io_service& ioService, const ReTurnConfig& config);  // ioService used to start timers
    ~TurnManager();
 
-   asio::io_service& getIOService() { return mIOService; }
+   boost::asio::io_service& getIOService() { return mIOService; }
 
    unsigned short allocateAnyPort(StunTuple::TransportType transport);
    unsigned short allocateEvenPort(StunTuple::TransportType transport);
@@ -44,7 +44,7 @@ private:
    PortAllocationMap& getPortAllocationMap(StunTuple::TransportType transport);
    unsigned short advanceLastAllocatedPort(StunTuple::TransportType transport, unsigned int numToAdvance = 1);
 
-   asio::io_service& mIOService;
+   boost::asio::io_service& mIOService;
    const ReTurnConfig& mConfig;
 };
 

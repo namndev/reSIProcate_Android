@@ -199,6 +199,18 @@ class BaseSecurity
       SSL_CTX*       getTlsCtx ();
       SSL_CTX*       getSslCtx ();
       
+      //qilex
+	  SSL_CTX*       getDomainCtx()
+	  {
+		  return mDomainCtx;
+	  }
+
+	  void           setDomainCtx(SSL_CTX* ctx)
+	  {
+		  mDomainCtx = ctx;
+	  }
+	  //end qilex
+
       X509*     getDomainCert( const Data& domain );
       EVP_PKEY* getDomainKey(  const Data& domain );
       X509*     getUserCert(const Data& aor);
@@ -223,6 +235,9 @@ class BaseSecurity
        */
       SSL_CTX*       mTlsCtx;
       SSL_CTX*       mSslCtx;
+
+      SSL_CTX*       mDomainCtx; //Qilex
+
       static void dumpAsn(char*, Data);
 
       CipherList mCipherList;
@@ -273,8 +288,10 @@ class Security : public BaseSecurity
       void addCAFile(const Data& caFile);
 
       virtual void preload();
-      virtual SSL_CTX* createDomainCtx(const SSL_METHOD* method, const Data& domain, const Data& certificateFilename, 
+      virtual SSL_CTX* createDomainCtx(const SSL_METHOD* method, const Data& domain, const Data& certificateFilename,
                                        const Data& privateKeyFilename, const Data& privateKeyPassPhrase);
+      // MADMAN
+      virtual SSL_CTX* createDomainCtx(const SSL_METHOD* method, const Data& domain);
 
       virtual void onReadPEM(const Data& name, PEMType type, Data& buffer) const;
       virtual void onWritePEM(const Data& name, PEMType type, const Data& buffer) const;

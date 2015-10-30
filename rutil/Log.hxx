@@ -15,7 +15,7 @@
 #include "rutil/HashMap.hxx"
 #include "rutil/ThreadIf.hxx"
 #include <iostream>
-
+#include <sstream>
 // !ipse! I think that this remark is no more valid with recent changes,
 // but I don't have MacOs X to test with. Someone should take this duty.
 //
@@ -114,7 +114,10 @@ class Log
 
             EncodeStream& asStream() {return mStream;}
             operator EncodeStream&() {return mStream;}
-
+#ifdef ANDROID
+	std::stringbuf mStringbuf;
+	std::ostream mAndroidStream;
+#endif
          private:
             resip::Log::Level mLevel;
             const resip::Subsystem& mSubsystem;

@@ -14,7 +14,7 @@ using namespace resip;
 
 namespace reTurn {
 
-TcpConnection::TcpConnection(asio::io_service& ioService,
+TcpConnection::TcpConnection(boost::asio::io_service& ioService,
     ConnectionManager& manager, RequestHandler& handler)
   : AsyncTcpSocketBase(ioService),
     mConnectionManager(manager),
@@ -27,7 +27,7 @@ TcpConnection::~TcpConnection()
    DebugLog(<< "TcpConnection destroyed.");
 }
 
-asio::ip::tcp::socket& 
+boost::asio::ip::tcp::socket&
 TcpConnection::socket()
 {
   return mSocket;
@@ -38,7 +38,7 @@ TcpConnection::start()
 {
    DebugLog(<< "TcpConnection started.");
    setConnectedAddressAndPort();
-   asio::error_code ec;
+   boost::system::error_code ec;
    mLocalAddress = mSocket.local_endpoint(ec).address();
    mLocalPort = mSocket.local_endpoint(ec).port();
    doFramedReceive();
@@ -47,7 +47,7 @@ TcpConnection::start()
 void 
 TcpConnection::stop()
 {
-   asio::error_code ec;
+	boost::system::error_code ec;
    mSocket.close(ec);
 }
 
@@ -58,7 +58,7 @@ TcpConnection::close()
 }
 
 void 
-TcpConnection::onReceiveSuccess(const asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
+TcpConnection::onReceiveSuccess(const boost::asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
 {
    if (data->size() > 4)
    {
@@ -136,9 +136,9 @@ TcpConnection::onReceiveSuccess(const asio::ip::address& address, unsigned short
 }
 
 void 
-TcpConnection::onReceiveFailure(const asio::error_code& e)
+TcpConnection::onReceiveFailure(const boost::system::error_code& e)
 {
-   if(e != asio::error::operation_aborted)
+   if(e != boost::asio::error::operation_aborted)
    {
       InfoLog(<< "TcpConnection::onReceiveFailure: " << e.value() << "-" << e.message());
       close();
@@ -151,9 +151,9 @@ TcpConnection::onSendSuccess()
 }
 
 void
-TcpConnection::onSendFailure(const asio::error_code& error)
+TcpConnection::onSendFailure(const boost::system::error_code& error)
 {
-   if(error != asio::error::operation_aborted)
+   if(error != boost::asio::error::operation_aborted)
    {
       InfoLog(<< "TcpConnection::onSendFailure: " << error.value() << "-" << error.message());
       close();

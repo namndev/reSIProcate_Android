@@ -53,6 +53,15 @@ class Headers
          defineHeader(IdentityInfo, "Identity-Info", GenericUri, "RFC 4474"),
          defineMultiHeader(Require, "Require", Token, "RFC 3261"),
          defineMultiHeader(Contact, "Contact", NameAddr, "RFC 3261"),
+		   defineMultiHeader(XAlias, "X-Alias", NameAddr, "Madman"),
+		   defineHeader(XCurrentAlias, "X-CurrentAlias", NameAddr, "Madman"),
+		   defineHeader(XAuthenticate, "X-Authenticate", StringCategory, "Madman"),
+         defineHeader(XMessageComposingInfo, "X-Message-Composing-Info",  StringCategory, "Madman"),
+         defineHeader(XPushOS, "X-Push-OS",  StringCategory, "Madman"),
+         defineHeader(XPushDeviceID, "X-Push-DeviceID",  StringCategory, "Madman"),
+         defineHeader(XPushToken, "X-Push-Token",  StringCategory, "Madman"),
+		   defineHeader(XMessageType, "X-MessageType",  StringCategory, "Madman"),
+		   defineHeader(XMessageUUID, "X-Message-UUID",  StringCategory, "Madman"),
 
          defineHeader(To, "To", NameAddr, "RFC 3261"), 
          defineHeader(From, "From", NameAddr, "RFC 3261"),
@@ -106,6 +115,7 @@ class Headers
          defineHeader(SubscriptionState, "Subscription-State", Token, "RFC 3265"),
          defineHeader(ReferTo, "Refer-To", NameAddr, "RFC 3515"),
          defineHeader(ReferredBy, "Referred-By", NameAddr, "RFC 3892"),
+		   defineHeader(XOfflineSecond, "X-Offline-Seconds",  UInt32Category, "Madman"), // MADMAN: add header for user offline second
          defineMultiHeader(Authorization, "Authorization", Auth, "RFC 3261"),
          defineHeader(Replaces, "Replaces", CallId, "RFC 3891"),
          defineHeader(Event, "Event", Token, "RFC 3265"),

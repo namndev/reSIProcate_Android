@@ -20,7 +20,7 @@ class UdpServer
 {
 public:
    /// Create the server to listen on the specified UDP address and port
-   explicit UdpServer(asio::io_service& ioService, RequestHandler& requestHandler, const asio::ip::address& address, unsigned short port);
+   explicit UdpServer(boost::asio::io_service& ioService, RequestHandler& requestHandler, const boost::asio::ip::address& address, unsigned short port);
    ~UdpServer();
 
    void start();
@@ -30,18 +30,18 @@ public:
    bool isRFC3489BackwardsCompatServer();
 
    ///// Returns the socket for this server
-   asio::ip::udp::socket& getSocket();
+   boost::asio::ip::udp::socket& getSocket();
 
-   void cleanupResponseMap(const asio::error_code& e, UInt128 tid);
+   void cleanupResponseMap(const boost::system::error_code& e, UInt128 tid);
 
 private:
    /// Handle completion of a receive operation
-   virtual void onReceiveSuccess(const asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data);
-   virtual void onReceiveFailure(const asio::error_code& e);
+   virtual void onReceiveSuccess(const boost::asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data);
+   virtual void onReceiveFailure(const boost::system::error_code& e);
 
    /// Handle completion of a send operation
    virtual void onSendSuccess();
-   virtual void onSendFailure(const asio::error_code& e);
+   virtual void onSendFailure(const boost::system::error_code& e);
 
    /// Manages turn allocations
    TurnAllocationManager mTurnAllocationManager;
@@ -50,7 +50,7 @@ private:
    RequestHandler& mRequestHandler;
 
    // Stores the local address and port
-   asio::ip::address mLocalAddress;
+   boost::asio::ip::address mLocalAddress;
    unsigned short mLocalPort;
 
    /// The RFC3489 Alternate Server
@@ -67,7 +67,7 @@ private:
 
       UdpServer* mResponseUdpServer;
       StunMessage* mResponseMessage;
-      asio::deadline_timer mCleanupTimer;
+      boost::asio::deadline_timer mCleanupTimer;
    };
    typedef std::map<UInt128, ResponseEntry*> ResponseMap;
    ResponseMap mResponseMap;

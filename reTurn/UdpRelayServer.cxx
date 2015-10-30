@@ -13,13 +13,13 @@ using namespace std;
 
 namespace reTurn {
 
-UdpRelayServer::UdpRelayServer(asio::io_service& ioService, TurnAllocation& turnAllocation)
+UdpRelayServer::UdpRelayServer(boost::asio::io_service& ioService, TurnAllocation& turnAllocation)
 : AsyncUdpSocketBase(ioService),
   mTurnAllocation(turnAllocation),
   mStopping(false),
   mBindSuccess(false)
 {
-   asio::error_code ec = bind(turnAllocation.getRequestedTuple().getAddress(), turnAllocation.getRequestedTuple().getPort());
+	boost::system::error_code ec = bind(turnAllocation.getRequestedTuple().getAddress(), turnAllocation.getRequestedTuple().getPort());
    if(ec)
    {
       ErrLog(<< "UdpRelayServer failed to start properly.  [" << mTurnAllocation.getRequestedTuple().getAddress().to_string() << ":" << mTurnAllocation.getRequestedTuple().getPort() << "], error=" << ec.value() << "-" << ec.message());
@@ -55,13 +55,13 @@ UdpRelayServer::startReceiving()
 void 
 UdpRelayServer::stop()
 {
-   asio::error_code ec;
+	boost::system::error_code ec;
    mStopping = true;
    mSocket.close(ec);
 }
 
 void 
-UdpRelayServer::onReceiveSuccess(const asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
+UdpRelayServer::onReceiveSuccess(const boost::asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
 {
    if(mStopping)
    {
@@ -86,9 +86,9 @@ UdpRelayServer::onReceiveSuccess(const asio::ip::address& address, unsigned shor
 }
 
 void 
-UdpRelayServer::onReceiveFailure(const asio::error_code& e)
+UdpRelayServer::onReceiveFailure(const boost::system::error_code& e)
 {
-   if(!mStopping && e != asio::error::operation_aborted && e != asio::error::bad_descriptor)
+   if(!mStopping && e != boost::asio::error::operation_aborted && e != boost::asio::error::bad_descriptor)
    {
       doReceive();
    }
@@ -100,9 +100,9 @@ UdpRelayServer::onSendSuccess()
 }
 
 void
-UdpRelayServer::onSendFailure(const asio::error_code& error)
+UdpRelayServer::onSendFailure(const boost::system::error_code& error)
 {
-   if(!mStopping && error != asio::error::operation_aborted)
+   if(!mStopping && error != boost::asio::error::operation_aborted)
    {
       if(mLastSendErrorCode == error)
       {

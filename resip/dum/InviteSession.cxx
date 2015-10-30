@@ -2148,12 +2148,36 @@ InviteSession::dispatchBye(const SipMessage& msg)
       // !jf! should we make some other callback here
       transition(Terminated);
 
-      if (mDum.mDialogEventStateManager)
+      bool bPaymentRequireReasion = false;
+      if (msg.exists(h_Reasons))
       {
-         mDum.mDialogEventStateManager->onTerminated(mDialog, msg, InviteSessionHandler::RemoteBye);
-      }
-
-      handler->onTerminated(getSessionHandle(), InviteSessionHandler::RemoteBye, &msg);
+     	  if (msg.header(h_Reasons).front().exists(p_cause))
+     	  {
+     	      int reasonCode = msg.header(h_Reasons).front().param(p_cause);
+     	      if (reasonCode == 402) {
+     	    	  bPaymentRequireReasion = true;
+     	      }
+     	  }
+       }
+       if (mDum.mDialogEventStateManager)
+       {
+     	   if (bPaymentRequireReasion)
+     	   {
+     		   mDum.mDialogEventStateManager->onTerminated(mDialog, msg, InviteSessionHandler::PaymentRequired);
+     	    }
+     	   else
+     	   {
+     	       mDum.mDialogEventStateManager->onTerminated(mDialog, msg, InviteSessionHandler::RemoteBye);
+     	   }
+        }
+        if (bPaymentRequireReasion)
+        {
+               handler->onTerminated(getSessionHandle(), InviteSessionHandler::PaymentRequired, &msg);
+         }
+         else
+         {
+               handler->onTerminated(getSessionHandle(), InviteSessionHandler::RemoteBye, &msg);
+         }
       mDum.destroy(this);
    }
    else

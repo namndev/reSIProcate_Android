@@ -855,6 +855,10 @@ Log::Guard::Guard(resip::Log::Level level,
    mFile(file),
    mLine(line),
    mData(Data::Borrow, mBuffer, sizeof(mBuffer)),
+#ifdef ANDROID
+   mStringbuf(),
+   mAndroidStream(&mStringbuf),
+#endif
    mStream(mData.clear())
 {
 	

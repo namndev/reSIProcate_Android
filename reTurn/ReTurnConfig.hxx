@@ -55,9 +55,9 @@ public:
    unsigned short mTurnPort;
    unsigned short mTlsTurnPort;
    unsigned short mAltStunPort;  
-   asio::ip::address mTurnAddress;
-   asio::ip::address mTurnV6Address;
-   asio::ip::address mAltStunAddress;
+   boost::asio::ip::address mTurnAddress;
+   boost::asio::ip::address mTurnV6Address;
+   boost::asio::ip::address mAltStunAddress;
 
    resip::Data mAuthenticationRealm;
    int mUserDatabaseCheckInterval;
@@ -104,7 +104,7 @@ private:
 class ReTurnUserFileScanner
 {
    public:
-      ReTurnUserFileScanner(asio::io_service& ioService, ReTurnConfig& reTurnConfig);
+      ReTurnUserFileScanner(boost::asio::io_service& ioService, ReTurnConfig& reTurnConfig);
       void start();
 
    private:
@@ -113,10 +113,10 @@ class ReTurnUserFileScanner
       static bool mHup;
       int mLoopInterval;
       time_t mNextFileCheck;
-      asio::deadline_timer mTimer;
+      boost::asio::deadline_timer mTimer;
 
       bool hasUserFileChanged();
-      void timeout(const asio::error_code& e);
+      void timeout(const boost::system::error_code& e);
 
       static void onSignal(int signum);
 };

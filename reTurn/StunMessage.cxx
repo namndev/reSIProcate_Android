@@ -355,15 +355,15 @@ StunMessage::setTupleFromStunAtrAddress(StunTuple& tuple, const StunAtrAddress& 
    if(address.family == StunMessage::IPv6Family)
    {
       // Note:  addr.ipv6 is stored in network byte order
-      asio::ip::address_v6::bytes_type bytes;
+	   boost::asio::ip::address_v6::bytes_type bytes;
       memcpy(bytes.data(), &address.addr.ipv6, bytes.size());
-      asio::ip::address_v6 addr(bytes);
+      boost::asio::ip::address_v6 addr(bytes);
       tuple.setAddress(addr);
    }
    else
    {
       // Note:  addr.ipv4 is stored in host byte order
-      asio::ip::address_v4 addr(address.addr.ipv4);
+	   boost::asio::ip::address_v4 addr(address.addr.ipv4);
       tuple.setAddress(addr);
    }
 }
@@ -1188,9 +1188,9 @@ operator<<( EncodeStream& strm, const StunMessage::StunAtrAddress& addr)
 {
    if(addr.family == StunMessage::IPv6Family)
    {
-      asio::ip::address_v6::bytes_type bytes;
+	  boost::asio::ip::address_v6::bytes_type bytes;
       memcpy(bytes.data(), &addr.addr.ipv6, bytes.size());
-      asio::ip::address_v6 addrv6(bytes);
+      boost::asio::ip::address_v6 addrv6(bytes);
 
       strm << "[" << addrv6.to_string() << "]:" << addr.port;
    }
@@ -1767,9 +1767,9 @@ StunMessage::getTupleFromUsername(StunTuple& tuple)
    {
       Data addressPart(Data::Share, mUsername->data(), 24); 
       addressPart = addressPart.base64decode();
-      asio::ip::address_v6::bytes_type bytes;
+      boost::asio::ip::address_v6::bytes_type bytes;
       memcpy(bytes.data(), addressPart.data(), bytes.size());
-      asio::ip::address_v6 addressv6(bytes);
+      boost::asio::ip::address_v6 addressv6(bytes);
       tuple.setAddress(addressv6);
 
       unsigned int port;
@@ -1782,9 +1782,9 @@ StunMessage::getTupleFromUsername(StunTuple& tuple)
    {
       Data addressPart(Data::Share, mUsername->data(), 8);  
       addressPart = addressPart.base64decode();
-      asio::ip::address_v4::bytes_type bytes;
+      boost::asio::ip::address_v4::bytes_type bytes;
       memcpy(bytes.data(), addressPart.data(), bytes.size());
-      asio::ip::address_v4 addressv4(bytes);
+      boost::asio::ip::address_v4 addressv4(bytes);
       tuple.setAddress(addressv4);
 
       unsigned int port;

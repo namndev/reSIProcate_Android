@@ -1,5 +1,6 @@
 #include "DataBuffer.hxx"
 #include <memory.h>
+#include <string.h>
 #include "rutil/ResipAssert.h"
 #include <rutil/WinLeakCheck.hxx>
 
@@ -18,7 +19,7 @@ DataBuffer::DataBuffer(const char* data, unsigned int size, deallocator dealloc)
    if ( mSize > 0 )
    {
       mBuffer = new char[mSize];
-      memcpy(mBuffer, data, mSize);
+      memcpy(mBuffer, data, size);
    }
    mStart = mBuffer;
 }
@@ -31,7 +32,7 @@ DataBuffer::DataBuffer(unsigned int size, deallocator dealloc)
    if ( mSize > 0 )
    {
       mBuffer = new char[mSize];
-      memset(mBuffer, 0, mSize);
+      memset(mBuffer, 0, size);
    }
 
    mStart  = mBuffer;

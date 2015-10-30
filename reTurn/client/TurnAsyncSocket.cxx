@@ -1,5 +1,6 @@
 #include "TurnAsyncSocket.hxx"
 #include "../AsyncSocketBase.hxx"
+#include <boost/bind.hpp>
 #include "ErrorCode.hxx"
 #include <rutil/WinLeakCheck.hxx>
 #include <rutil/Logger.hxx>
@@ -20,12 +21,12 @@ namespace reTurn {
 unsigned int TurnAsyncSocket::UnspecifiedLifetime = 0xFFFFFFFF;
 unsigned int TurnAsyncSocket::UnspecifiedBandwidth = 0xFFFFFFFF; 
 unsigned short TurnAsyncSocket::UnspecifiedToken = 0;
-asio::ip::address TurnAsyncSocket::UnspecifiedIpAddress = asio::ip::address::from_string("0.0.0.0");
+boost::asio::ip::address TurnAsyncSocket::UnspecifiedIpAddress = boost::asio::ip::address::from_string("0.0.0.0");
 
-TurnAsyncSocket::TurnAsyncSocket(asio::io_service& ioService, 
+TurnAsyncSocket::TurnAsyncSocket(boost::asio::io_service& ioService,
                                  AsyncSocketBase& asyncSocketBase,
                                  TurnAsyncSocketHandler* turnAsyncSocketHandler,
-                                 const asio::ip::address& address, 
+                                 const boost::asio::ip::address& address,
                                  unsigned short port) : 
    mIOService(ioService),
    mTurnAsyncSocketHandler(turnAsyncSocketHandler),
@@ -67,7 +68,7 @@ TurnAsyncSocket::doRequestSharedSecret()
    // Ensure Connected
    if(!mAsyncSocketBase.isConnected())
    {
-      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onSharedSecretFailure(getSocketDescriptor(), asio::error_code(reTurn::NotConnected, asio::error::misc_category));
+      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onSharedSecretFailure(getSocketDescriptor(), boost::system::error_code(reTurn::NotConnected, boost::asio::error::misc_category));
    }
    else
    {
@@ -124,7 +125,7 @@ TurnAsyncSocket::doBindRequest()
    // Ensure Connected
    if(!mAsyncSocketBase.isConnected())
    {
-      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onBindFailure(getSocketDescriptor(), asio::error_code(reTurn::NotConnected, asio::error::misc_category), StunTuple());
+      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onBindFailure(getSocketDescriptor(), boost::system::error_code(reTurn::NotConnected, boost::asio::error::misc_category), StunTuple());
    }
    else
    {
@@ -195,13 +196,13 @@ TurnAsyncSocket::doCreateAllocation(unsigned int lifetime,
    // Ensure Connected
    if(!mAsyncSocketBase.isConnected())
    {
-      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onAllocationFailure(getSocketDescriptor(), asio::error_code(reTurn::NotConnected, asio::error::misc_category));
+      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onAllocationFailure(getSocketDescriptor(), boost::system::error_code(reTurn::NotConnected, boost::asio::error::misc_category));
       return;
    }
 
    if(mHaveAllocation)
    {
-      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onAllocationFailure(getSocketDescriptor(), asio::error_code(reTurn::AlreadyAllocated, asio::error::misc_category));
+      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onAllocationFailure(getSocketDescriptor(), boost::system::error_code(reTurn::AlreadyAllocated, boost::asio::error::misc_category));
       return;
    }
 
@@ -235,7 +236,7 @@ TurnAsyncSocket::doCreateAllocation(unsigned int lifetime,
    }
    else
    {
-      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onAllocationFailure(getSocketDescriptor(), asio::error_code(reTurn::InvalidRequestedTransport, asio::error::misc_category));
+      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onAllocationFailure(getSocketDescriptor(), boost::system::error_code(reTurn::InvalidRequestedTransport, boost::asio::error::misc_category));
       delete request;
       return;
    }
@@ -265,7 +266,7 @@ TurnAsyncSocket::doRefreshAllocation(unsigned int lifetime)
 {
    if(!mHaveAllocation)
    {
-      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onRefreshFailure(getSocketDescriptor(), asio::error_code(NoAllocation, asio::error::misc_category));
+      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onRefreshFailure(getSocketDescriptor(), boost::system::error_code(NoAllocation, boost::asio::error::misc_category));
       if(mCloseAfterDestroyAllocationFinishes)
       {
          mHaveAllocation = false;
@@ -303,13 +304,13 @@ TurnAsyncSocket::doDestroyAllocation()
 }
 
 void
-TurnAsyncSocket::setActiveDestination(const asio::ip::address& address, unsigned short port)
+TurnAsyncSocket::setActiveDestination(const boost::asio::ip::address& address, unsigned short port)
 {
    mIOService.dispatch(weak_bind<AsyncSocketBase, void()>( mAsyncSocketBase.shared_from_this(), boost::bind( &TurnAsyncSocket::doSetActiveDestination, this, address, port )));
 }
 
 void
-TurnAsyncSocket::doSetActiveDestination(const asio::ip::address& address, unsigned short port)
+TurnAsyncSocket::doSetActiveDestination(const boost::asio::ip::address& address, unsigned short port)
 {
    // Setup Remote Peer 
    StunTuple remoteTuple(mRelayTransportType, address, port);
@@ -364,7 +365,7 @@ TurnAsyncSocket::doClearActiveDestination()
    // ensure there is an allocation
    if(!mHaveAllocation)
    {
-      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onClearActiveDestinationFailure(getSocketDescriptor(), asio::error_code(reTurn::NoAllocation, asio::error::misc_category));
+      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onClearActiveDestinationFailure(getSocketDescriptor(), boost::system::error_code(reTurn::NoAllocation, boost::asio::error::misc_category));
       return;
    }
 
@@ -433,7 +434,7 @@ TurnAsyncSocket::sendStunMessage(StunMessage* message, bool reTransmission, unsi
 }
 
 void 
-TurnAsyncSocket::handleReceivedData(const asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
+TurnAsyncSocket::handleReceivedData(const boost::asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
 {
    if(data->size() > 4)
    {
@@ -504,14 +505,14 @@ TurnAsyncSocket::handleReceivedData(const asio::ip::address& address, unsigned s
    else  // size <= 4
    {
       WarningLog(<< "TurnAsyncSocket::handleReceivedData: not enough data received (" << data->size() << " bytes) for stun or channel data message - discarding!");
-      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onReceiveFailure(getSocketDescriptor(), asio::error_code(reTurn::FrameError, asio::error::misc_category));         
+      if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onReceiveFailure(getSocketDescriptor(), boost::system::error_code(reTurn::FrameError, boost::asio::error::misc_category));
    }
 }
 
-asio::error_code 
+boost::system::error_code
 TurnAsyncSocket::handleStunMessage(StunMessage& stunMessage)
 {
-   asio::error_code errorCode;
+	boost::system::error_code errorCode;
    if(stunMessage.isValid())
    {
       if(stunMessage.mClass == StunMessage::StunClassSuccessResponse ||
@@ -520,7 +521,7 @@ TurnAsyncSocket::handleStunMessage(StunMessage& stunMessage)
       if(!stunMessage.checkMessageIntegrity(mHmacKey))
       {
          WarningLog(<< "TurnAsyncSocket::handleStunMessage: Stun message integrity is bad!");
-         return asio::error_code(reTurn::BadMessageIntegrity, asio::error::misc_category);
+         return boost::system::error_code(reTurn::BadMessageIntegrity, boost::asio::error::misc_category);
       }
       }
       else
@@ -528,7 +529,7 @@ TurnAsyncSocket::handleStunMessage(StunMessage& stunMessage)
          if(!stunMessage.checkMessageIntegrity(mLocalHmacKey))
          {
             WarningLog(<< "TurnAsyncSocket::handleStunMessage: Stun message integrity is bad!");
-            return asio::error_code(reTurn::BadMessageIntegrity, asio::error::misc_category);
+            return boost::system::error_code(reTurn::BadMessageIntegrity, boost::asio::error::misc_category);
          }
       }
 
@@ -586,7 +587,7 @@ TurnAsyncSocket::handleStunMessage(StunMessage& stunMessage)
             {
                // Unknown Comprehension-Required Attributes found
                WarningLog(<< "Ignoring DataInd with unknown comprehension required attributes.");
-               errorCode = asio::error_code(reTurn::UnknownRequiredAttributes, asio::error::misc_category);
+               errorCode = boost::system::error_code(reTurn::UnknownRequiredAttributes, boost::asio::error::misc_category);
             }
             else
             {
@@ -610,7 +611,7 @@ TurnAsyncSocket::handleStunMessage(StunMessage& stunMessage)
          {
             // Unknown Comprehension-Required Attributes found
             WarningLog(<< "Ignoring Response with unknown comprehension required attributes.");
-            return asio::error_code(reTurn::UnknownRequiredAttributes, asio::error::misc_category);
+            return boost::system::error_code(reTurn::UnknownRequiredAttributes, boost::asio::error::misc_category);
          }
 
          // First check if this response is for an active request
@@ -618,7 +619,7 @@ TurnAsyncSocket::handleStunMessage(StunMessage& stunMessage)
          if(it == mActiveRequestMap.end())
          {
             // Stray response - dropping
-            return asio::error_code(reTurn::StrayResponse, asio::error::misc_category);
+            return boost::system::error_code(reTurn::StrayResponse, boost::asio::error::misc_category);
          }
 
          {
@@ -686,19 +687,19 @@ TurnAsyncSocket::handleStunMessage(StunMessage& stunMessage)
    else
    {
       WarningLog(<< "TurnAsyncSocket::handleStunMessage: Read Invalid StunMsg.");
-      return asio::error_code(reTurn::ErrorParsingMessage, asio::error::misc_category);
+      return boost::system::error_code(reTurn::ErrorParsingMessage, boost::asio::error::misc_category);
    }
    return errorCode;
 }
 
-asio::error_code
+boost::system::error_code
 TurnAsyncSocket::handleDataInd(StunMessage& stunMessage)
 {
    if(stunMessage.mCntTurnXorPeerAddress == 0 || !stunMessage.mHasTurnData)
    {
       // Missing RemoteAddress or TurnData attribute
       WarningLog(<< "TurnAsyncSocket::handleDataInd: DataInd missing attributes.");
-      return asio::error_code(reTurn::MissingAttributes, asio::error::misc_category);
+      return boost::system::error_code(reTurn::MissingAttributes, boost::asio::error::misc_category);
    }
 
    StunTuple remoteTuple;
@@ -710,7 +711,7 @@ TurnAsyncSocket::handleDataInd(StunMessage& stunMessage)
    {
       // Remote Peer not found - discard data
       WarningLog(<< "TurnAsyncSocket::handleDataInd: Data received from unknown RemotePeer " << remoteTuple << " - discarding");
-      return asio::error_code(reTurn::UnknownRemoteAddress, asio::error::misc_category);
+      return boost::system::error_code(reTurn::UnknownRemoteAddress, boost::asio::error::misc_category);
    }
 
    boost::shared_ptr<DataBuffer> data(new DataBuffer(stunMessage.mTurnData->data(), stunMessage.mTurnData->size()));
@@ -719,10 +720,10 @@ TurnAsyncSocket::handleDataInd(StunMessage& stunMessage)
       remoteTuple.getPort(), 
       data);
 
-   return asio::error_code();
+   return boost::system::error_code();
 }
 
-asio::error_code
+boost::system::error_code
 TurnAsyncSocket::handleChannelBindResponse(StunMessage &request, StunMessage &response)
 {
    if(response.mClass == StunMessage::StunClassSuccessResponse)
@@ -734,7 +735,7 @@ TurnAsyncSocket::handleChannelBindResponse(StunMessage &request, StunMessage &re
       {
          // Remote Peer not found - discard
          WarningLog(<< "TurnAsyncSocket::handleChannelBindResponse: Received ChannelBindResponse for unknown channel (" << response.mTurnChannelNumber << ") - discarding");
-         asio::error_code ec(reTurn::InvalidChannelNumberReceived, asio::error::misc_category);
+         boost::system::error_code ec(reTurn::InvalidChannelNumberReceived, boost::asio::error::misc_category);
          if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onChannelBindFailure(getSocketDescriptor(), ec);
          return ec;
       }
@@ -752,22 +753,22 @@ TurnAsyncSocket::handleChannelBindResponse(StunMessage &request, StunMessage &re
       if(response.mHasErrorCode)
       {
          ErrLog(<< "TurnAsyncSocket::handleChannelBindResponse: Received ChannelBindResponse error: " << response.mErrorCode.errorClass * 100 + response.mErrorCode.number);
-         asio::error_code ec(response.mErrorCode.errorClass * 100 + response.mErrorCode.number, asio::error::misc_category);
+         boost::system::error_code ec(response.mErrorCode.errorClass * 100 + response.mErrorCode.number, boost::asio::error::misc_category);
          if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onChannelBindFailure(getSocketDescriptor(), ec);
          return ec;
       }
       else
       {
          ErrLog(<< "TurnAsyncSocket::handleChannelBindResponse: Received ChannelBindResponse error but no error code attribute found.");
-         asio::error_code ec(MissingAttributes, asio::error::misc_category);
+         boost::system::error_code ec(MissingAttributes, boost::asio::error::misc_category);
          if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onChannelBindFailure(getSocketDescriptor(), ec);
          return ec;
       }
    }
-   return asio::error_code();
+   return boost::system::error_code();
 }
 
-asio::error_code 
+boost::system::error_code
 TurnAsyncSocket::handleSharedSecretResponse(StunMessage &request, StunMessage &response)
 {
    if(response.mClass == StunMessage::StunClassSuccessResponse)
@@ -776,8 +777,8 @@ TurnAsyncSocket::handleSharedSecretResponse(StunMessage &request, StunMessage &r
       if(!response.mHasUsername || !response.mHasPassword)
       {
          WarningLog(<< "TurnAsyncSocket::handleSharedSecretResponse: Stun response message for SharedSecretRequest is missing username and/or password!");
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onSharedSecretFailure(getSocketDescriptor(), asio::error_code(MissingAttributes, asio::error::misc_category));
-         return asio::error_code(MissingAttributes, asio::error::misc_category);
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onSharedSecretFailure(getSocketDescriptor(), boost::system::error_code(MissingAttributes, boost::asio::error::misc_category));
+         return boost::system::error_code(MissingAttributes, boost::asio::error::misc_category);
       }
 
       if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onSharedSecretSuccess(getSocketDescriptor(), response.mUsername->c_str(), response.mUsername->size(), 
@@ -788,18 +789,18 @@ TurnAsyncSocket::handleSharedSecretResponse(StunMessage &request, StunMessage &r
       // Check error code
       if(response.mHasErrorCode)
       {
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onSharedSecretFailure(getSocketDescriptor(), asio::error_code(response.mErrorCode.errorClass * 100 + response.mErrorCode.number, asio::error::misc_category));
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onSharedSecretFailure(getSocketDescriptor(), boost::system::error_code(response.mErrorCode.errorClass * 100 + response.mErrorCode.number, boost::asio::error::misc_category));
       }
       else
       {
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onSharedSecretFailure(getSocketDescriptor(), asio::error_code(MissingAttributes, asio::error::misc_category));
-         return asio::error_code(MissingAttributes, asio::error::misc_category);
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onSharedSecretFailure(getSocketDescriptor(), boost::system::error_code(MissingAttributes, boost::asio::error::misc_category));
+         return boost::system::error_code(MissingAttributes, boost::asio::error::misc_category);
       }
    }
-   return asio::error_code();
+   return boost::system::error_code();
 }
 
-asio::error_code
+boost::system::error_code
 TurnAsyncSocket::handleBindRequest(StunMessage& stunMessage)
 {
    // Note: handling of BindRequest is not fully backwards compatible with RFC3489 - it is inline with RFC5389
@@ -837,10 +838,10 @@ TurnAsyncSocket::handleBindRequest(StunMessage& stunMessage)
    
    if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onIncomingBindRequestProcessed(getSocketDescriptor(), stunMessage.mRemoteTuple);
 
-   return asio::error_code();
+   return boost::system::error_code();
 }
 
-asio::error_code 
+boost::system::error_code
 TurnAsyncSocket::handleBindResponse(StunMessage &request, StunMessage &response)
 {
    if(response.mClass == StunMessage::StunClassSuccessResponse)
@@ -857,8 +858,8 @@ TurnAsyncSocket::handleBindResponse(StunMessage &request, StunMessage &response)
       }
       else
       {
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onBindFailure(getSocketDescriptor(), asio::error_code(MissingAttributes, asio::error::misc_category), response.mRemoteTuple);
-         return asio::error_code(MissingAttributes, asio::error::misc_category);
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onBindFailure(getSocketDescriptor(), boost::system::error_code(MissingAttributes, boost::asio::error::misc_category), response.mRemoteTuple);
+         return boost::system::error_code(MissingAttributes, boost::asio::error::misc_category);
       }
       if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onBindSuccess(getSocketDescriptor(), reflexiveTuple, response.mRemoteTuple);
    }
@@ -867,18 +868,18 @@ TurnAsyncSocket::handleBindResponse(StunMessage &request, StunMessage &response)
       // Check if success or not
       if(response.mHasErrorCode)
       {
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onBindFailure(getSocketDescriptor(), asio::error_code(response.mErrorCode.errorClass * 100 + response.mErrorCode.number, asio::error::misc_category), response.mRemoteTuple);
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onBindFailure(getSocketDescriptor(), boost::system::error_code(response.mErrorCode.errorClass * 100 + response.mErrorCode.number, boost::asio::error::misc_category), response.mRemoteTuple);
       }
       else
       {
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onBindFailure(getSocketDescriptor(), asio::error_code(MissingAttributes, asio::error::misc_category), response.mRemoteTuple);
-         return asio::error_code(MissingAttributes, asio::error::misc_category);
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onBindFailure(getSocketDescriptor(), boost::system::error_code(MissingAttributes, boost::asio::error::misc_category), response.mRemoteTuple);
+         return boost::system::error_code(MissingAttributes, boost::asio::error::misc_category);
       }
    }
-   return asio::error_code();
+   return boost::system::error_code();
 }
 
-asio::error_code 
+boost::system::error_code
 TurnAsyncSocket::handleAllocateResponse(StunMessage &request, StunMessage &response)
 {
    if(response.mClass == StunMessage::StunClassSuccessResponse)
@@ -918,7 +919,7 @@ TurnAsyncSocket::handleAllocateResponse(StunMessage &request, StunMessage &respo
       }
       else
       {
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onAllocationFailure(getSocketDescriptor(), asio::error_code(MissingAttributes, asio::error::misc_category));
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onAllocationFailure(getSocketDescriptor(), boost::system::error_code(MissingAttributes, boost::asio::error::misc_category));
       }
    }
    else
@@ -926,18 +927,18 @@ TurnAsyncSocket::handleAllocateResponse(StunMessage &request, StunMessage &respo
       // Check if success or not
       if(response.mHasErrorCode)
       {
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onAllocationFailure(getSocketDescriptor(), asio::error_code(response.mErrorCode.errorClass * 100 + response.mErrorCode.number, asio::error::misc_category));
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onAllocationFailure(getSocketDescriptor(), boost::system::error_code(response.mErrorCode.errorClass * 100 + response.mErrorCode.number, boost::asio::error::misc_category));
       }
       else
       {
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onAllocationFailure(getSocketDescriptor(), asio::error_code(MissingAttributes, asio::error::misc_category));
-         return asio::error_code(MissingAttributes, asio::error::misc_category);
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onAllocationFailure(getSocketDescriptor(), boost::system::error_code(MissingAttributes, boost::asio::error::misc_category));
+         return boost::system::error_code(MissingAttributes, boost::asio::error::misc_category);
       }
    }
-   return asio::error_code();
+   return boost::system::error_code();
 }
 
-asio::error_code 
+boost::system::error_code
 TurnAsyncSocket::handleRefreshResponse(StunMessage &request, StunMessage &response)
 {
    if(response.mClass == StunMessage::StunClassSuccessResponse)
@@ -977,7 +978,7 @@ TurnAsyncSocket::handleRefreshResponse(StunMessage &request, StunMessage &respon
       // Check if success or not
       if(response.mHasErrorCode)
       {
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onRefreshFailure(getSocketDescriptor(), asio::error_code(response.mErrorCode.errorClass * 100 + response.mErrorCode.number, asio::error::misc_category));
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onRefreshFailure(getSocketDescriptor(), boost::system::error_code(response.mErrorCode.errorClass * 100 + response.mErrorCode.number, boost::asio::error::misc_category));
          if(mCloseAfterDestroyAllocationFinishes)
          {
             cancelAllocationTimer();
@@ -992,17 +993,17 @@ TurnAsyncSocket::handleRefreshResponse(StunMessage &request, StunMessage &respon
       }
       else
       {
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onRefreshFailure(getSocketDescriptor(), asio::error_code(MissingAttributes, asio::error::misc_category));
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onRefreshFailure(getSocketDescriptor(), boost::system::error_code(MissingAttributes, boost::asio::error::misc_category));
          if(mCloseAfterDestroyAllocationFinishes)
          {
             cancelAllocationTimer();
             mHaveAllocation = false;
             actualClose();
          }
-         return asio::error_code(MissingAttributes, asio::error::misc_category);
+         return boost::system::error_code(MissingAttributes, boost::asio::error::misc_category);
       }
    }
-   return asio::error_code();
+   return boost::system::error_code();
 }
 
 void
@@ -1013,7 +1014,7 @@ TurnAsyncSocket::send(const char* buffer, unsigned int size)
 }
 
 void 
-TurnAsyncSocket::sendTo(const asio::ip::address& address, unsigned short port, const char* buffer, unsigned int size)
+TurnAsyncSocket::sendTo(const boost::asio::ip::address& address, unsigned short port, const char* buffer, unsigned int size)
 {
    boost::shared_ptr<DataBuffer> data(new DataBuffer(buffer, size));
    sendToFramed(address, port, data);
@@ -1026,7 +1027,7 @@ TurnAsyncSocket::sendFramed(boost::shared_ptr<DataBuffer>& data)
 }
 
 void 
-TurnAsyncSocket::sendToFramed(const asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
+TurnAsyncSocket::sendToFramed(const boost::asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
 {
    mIOService.dispatch(weak_bind<AsyncSocketBase, void()>( mAsyncSocketBase.shared_from_this(), boost::bind(&TurnAsyncSocket::doSendToFramed, this, address, port, data)));
 }
@@ -1039,7 +1040,7 @@ TurnAsyncSocket::sendUnframed(boost::shared_ptr<DataBuffer>& data)
 }
 
 void 
-TurnAsyncSocket::sendToUnframed(const asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
+TurnAsyncSocket::sendToUnframed(const boost::asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
 {
    StunTuple destination(mLocalBinding.getTransportType(), address, port);
    mAsyncSocketBase.send(destination, data);
@@ -1064,7 +1065,7 @@ TurnAsyncSocket::doSendFramed(boost::shared_ptr<DataBuffer>& data)
 }
 
 void 
-TurnAsyncSocket::doSendToFramed(const asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
+TurnAsyncSocket::doSendToFramed(const boost::asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
 {
    // Setup Remote Peer 
    StunTuple remoteTuple(mRelayTransportType, address, port);
@@ -1164,7 +1165,7 @@ TurnAsyncSocket::sendOverChannel(unsigned short channel, boost::shared_ptr<DataB
    mAsyncSocketBase.send(destination, channel, data);
 }
 
-TurnAsyncSocket::RequestEntry::RequestEntry(asio::io_service& ioService, 
+TurnAsyncSocket::RequestEntry::RequestEntry(boost::asio::io_service& ioService,
                                             TurnAsyncSocket* turnAsyncSocket, 
                                             StunMessage* requestMessage,
                                             unsigned int rc,
@@ -1191,7 +1192,7 @@ TurnAsyncSocket::RequestEntry::startTimer()
    //std::cout << "RequestEntry::startTimer() " << mTimeout << " " << mRequestMessage->mHeader.magicCookieAndTid << std::endl;
    // start the request timer
    mRequestTimer.expires_from_now(boost::posix_time::milliseconds(mTimeout));  
-   mRequestTimer.async_wait(weak_bind<RequestEntry, void(const asio::error_code&)>(shared_from_this(), boost::bind(&TurnAsyncSocket::RequestEntry::requestTimerExpired, this, asio::placeholders::error)));
+   mRequestTimer.async_wait(weak_bind<RequestEntry, void(const boost::system::error_code&)>(shared_from_this(), boost::bind(&TurnAsyncSocket::RequestEntry::requestTimerExpired, this, boost::asio::placeholders::error)));
 }
 
 void
@@ -1210,7 +1211,7 @@ TurnAsyncSocket::RequestEntry::~RequestEntry()
 }
 
 void 
-TurnAsyncSocket::RequestEntry::requestTimerExpired(const asio::error_code& e)
+TurnAsyncSocket::RequestEntry::requestTimerExpired(const boost::system::error_code& e)
 {
    if(!e && mRequestMessage)  // Note:  There is a race condition with clearing out of mRequestMessage when 401 is received - check that mRequestMessage is not 0 avoids any resulting badness
    {
@@ -1259,16 +1260,16 @@ TurnAsyncSocket::requestTimeout(UInt128 tid)
       switch(requestEntry->mRequestMessage->mMethod)
       {
       case StunMessage::BindMethod:
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onBindFailure(getSocketDescriptor(), asio::error_code(reTurn::ResponseTimeout, asio::error::misc_category), (requestEntry->mDest ? *(requestEntry->mDest) : StunTuple()));
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onBindFailure(getSocketDescriptor(), boost::system::error_code(reTurn::ResponseTimeout, boost::asio::error::misc_category), (requestEntry->mDest ? *(requestEntry->mDest) : StunTuple()));
          break;
       case StunMessage::SharedSecretMethod:
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onSharedSecretFailure(getSocketDescriptor(), asio::error_code(reTurn::ResponseTimeout, asio::error::misc_category));
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onSharedSecretFailure(getSocketDescriptor(), boost::system::error_code(reTurn::ResponseTimeout, boost::asio::error::misc_category));
          break;
       case StunMessage::TurnAllocateMethod:
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onAllocationFailure(getSocketDescriptor(), asio::error_code(reTurn::ResponseTimeout, asio::error::misc_category));
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onAllocationFailure(getSocketDescriptor(), boost::system::error_code(reTurn::ResponseTimeout, boost::asio::error::misc_category));
          break;
       case StunMessage::TurnRefreshMethod:
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onRefreshFailure(getSocketDescriptor(), asio::error_code(reTurn::ResponseTimeout, asio::error::misc_category));
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onRefreshFailure(getSocketDescriptor(), boost::system::error_code(reTurn::ResponseTimeout, boost::asio::error::misc_category));
          if(mCloseAfterDestroyAllocationFinishes)
          {
             mHaveAllocation = false;
@@ -1277,7 +1278,7 @@ TurnAsyncSocket::requestTimeout(UInt128 tid)
          break;
       case StunMessage::TurnChannelBindMethod:  
          // Note:  ChannelBind can happen after SetActiveDestination, after a sendTo, or during a channel bind refresh
-         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onChannelBindFailure(getSocketDescriptor(), asio::error_code(reTurn::ResponseTimeout, asio::error::misc_category));
+         if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onChannelBindFailure(getSocketDescriptor(), boost::system::error_code(reTurn::ResponseTimeout, boost::asio::error::misc_category));
          break;
       default:
          resip_assert(false);
@@ -1301,7 +1302,7 @@ void
 TurnAsyncSocket::startAllocationTimer()
 {
    mAllocationTimer.expires_from_now(boost::posix_time::seconds((mLifetime*5)/8));  // Allocation refresh should sent before 3/4 lifetime - use 5/8 lifetime 
-   mAllocationTimer.async_wait(weak_bind<AsyncSocketBase, void(const asio::error_code&)>(mAsyncSocketBase.shared_from_this(), boost::bind(&TurnAsyncSocket::allocationTimerExpired, this, asio::placeholders::error)));
+   mAllocationTimer.async_wait(weak_bind<AsyncSocketBase, void(const boost::system::error_code&)>(mAsyncSocketBase.shared_from_this(), boost::bind(&TurnAsyncSocket::allocationTimerExpired, this, boost::asio::placeholders::error)));
 }
 
 void
@@ -1311,7 +1312,7 @@ TurnAsyncSocket::cancelAllocationTimer()
 }
 
 void 
-TurnAsyncSocket::allocationTimerExpired(const asio::error_code& e)
+TurnAsyncSocket::allocationTimerExpired(const boost::system::error_code& e)
 {
    if(!e)
       doRefreshAllocation(mLifetime);
@@ -1324,12 +1325,12 @@ TurnAsyncSocket::startChannelBindingTimer(unsigned short channel)
    if(it==mChannelBindingTimers.end())
    {
       std::pair<ChannelBindingTimerMap::iterator,bool> ret = 
-         mChannelBindingTimers.insert(std::pair<unsigned short, asio::deadline_timer*>(channel, new asio::deadline_timer(mIOService)));
+         mChannelBindingTimers.insert(std::pair<unsigned short, boost::asio::deadline_timer*>(channel, new boost::asio::deadline_timer(mIOService)));
       resip_assert(ret.second);
       it = ret.first;
    }
    it->second->expires_from_now(boost::posix_time::seconds(TURN_CHANNEL_BINDING_REFRESH_SECONDS));  
-   it->second->async_wait(weak_bind<AsyncSocketBase, void(const asio::error_code&)>( mAsyncSocketBase.shared_from_this(), boost::bind(&TurnAsyncSocket::channelBindingTimerExpired, this, asio::placeholders::error, channel)));
+   it->second->async_wait(weak_bind<AsyncSocketBase, void(const boost::system::error_code&)>( mAsyncSocketBase.shared_from_this(), boost::bind(&TurnAsyncSocket::channelBindingTimerExpired, this, boost::asio::placeholders::error, channel)));
 }
 
 void
@@ -1346,7 +1347,7 @@ TurnAsyncSocket::cancelChannelBindingTimers()
 }
 
 void 
-TurnAsyncSocket::channelBindingTimerExpired(const asio::error_code& e, unsigned short channel)
+TurnAsyncSocket::channelBindingTimerExpired(const boost::system::error_code& e, unsigned short channel)
 {
    if(!e)
    {

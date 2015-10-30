@@ -145,7 +145,23 @@ genericLogCheckLevel(resip::Log::Level level, const resip::Subsystem& sub)
 {
    return resip::Log::isLogging(level, sub);
 }
-
+#ifdef ANDROID
+#include <android/log.h>
+#if DEBUG
+#define GenericLog(system_, level_, args_)                              \
+   do                                                                   \
+   {                                                                    \
+      if (genericLogCheckLevel(level_, system_))                        \
+      {                                                                 \
+         resip::Log::Guard _resip_log_guard(level_, system_, __FILE__, __LINE__); \
+         _resip_log_guard.mAndroidStream  << system << "|" << __FILE__ << ":" << __LINE__ << " " args_; \
+         __android_log_write(ANDROID_LOG_DEBUG,"resiprocatejni",_resip_log_guard.mStringbuf.str().c_str());          \
+      }                                                                 \
+   } while (false)
+#else
+#define GenericLog(system_, level_, args_)
+#endif // End DEBUG
+#else
 // do/while allows a {} block in an expression
 #define GenericLog(system_, level_, args_)                              \
    do                                                                   \
@@ -156,6 +172,7 @@ genericLogCheckLevel(resip::Log::Level level, const resip::Subsystem& sub)
          _resip_log_guard.asStream()  args_;                            \
       }                                                                 \
    } while (false)
+#endif // End ANDROID
 
 #ifdef NO_DEBUG
 // Suppress debug logging at compile time

@@ -11,7 +11,7 @@ using namespace std;
 
 namespace reTurn {
 
-AsyncUdpSocketBase::AsyncUdpSocketBase(asio::io_service& ioService) 
+AsyncUdpSocketBase::AsyncUdpSocketBase(boost::asio::io_service& ioService)
    : AsyncSocketBase(ioService),
      mSocket(ioService),
      mResolver(ioService)
@@ -28,26 +28,26 @@ AsyncUdpSocketBase::getSocketDescriptor()
    return (unsigned int)mSocket.native(); 
 }
 
-asio::error_code 
-AsyncUdpSocketBase::bind(const asio::ip::address& address, unsigned short port)
+boost::system::error_code
+AsyncUdpSocketBase::bind(const boost::asio::ip::address& address, unsigned short port)
 {
-   asio::error_code errorCode;
-   mSocket.open(address.is_v6() ? asio::ip::udp::v6() : asio::ip::udp::v4(), errorCode);
+	boost::system::error_code errorCode;
+   mSocket.open(address.is_v6() ? boost::asio::ip::udp::v6() : boost::asio::ip::udp::v4(), errorCode);
    if(!errorCode)
    {
 #ifdef USE_IPV6
 #ifdef __linux__
       if(address.is_v6())
       {
-         asio::ip::v6_only v6_opt(true);
+    	  boost::asio::ip::v6_only v6_opt(true);
          mSocket.set_option(v6_opt);
       }
 #endif
 #endif
-      mSocket.set_option(asio::ip::udp::socket::reuse_address(true), errorCode);
-      mSocket.set_option(asio::socket_base::receive_buffer_size(66560));
+      mSocket.set_option(boost::asio::ip::udp::socket::reuse_address(true), errorCode);
+      mSocket.set_option(boost::asio::socket_base::receive_buffer_size(66560));
       //mSocket.set_option(asio::socket_base::send_buffer_size(66560));
-      mSocket.bind(asio::ip::udp::endpoint(address, port), errorCode);
+      mSocket.bind(boost::asio::ip::udp::endpoint(address, port), errorCode);
    }
    return errorCode;
 }
@@ -59,19 +59,19 @@ AsyncUdpSocketBase::connect(const std::string& address, unsigned short port)
    // into a list of endpoints.
    resip::Data service(port);
 #ifdef USE_IPV6
-   asio::ip::udp::resolver::query query(address, service.c_str());
+   boost::asio::ip::udp::resolver::query query(address, service.c_str());
 #else
-   asio::ip::udp::resolver::query query(asio::ip::udp::v4(), address, service.c_str());   
+   boost::asio::ip::udp::resolver::query query(boost::asio::ip::udp::v4(), address, service.c_str());
 #endif
    mResolver.async_resolve(query,
         boost::bind(&AsyncSocketBase::handleUdpResolve, shared_from_this(),
-                    asio::placeholders::error,
-                    asio::placeholders::iterator));
+        		boost::asio::placeholders::error,
+				boost::asio::placeholders::iterator));
 }
 
 void 
-AsyncUdpSocketBase::handleUdpResolve(const asio::error_code& ec,
-                                     asio::ip::udp::resolver::iterator endpoint_iterator)
+AsyncUdpSocketBase::handleUdpResolve(const boost::system::error_code& ec,
+		boost::asio::ip::udp::resolver::iterator endpoint_iterator)
 {
    if (!ec)
    {
@@ -89,7 +89,7 @@ AsyncUdpSocketBase::handleUdpResolve(const asio::error_code& ec,
    }
 }
 
-const asio::ip::address 
+const boost::asio::ip::address
 AsyncUdpSocketBase::getSenderEndpointAddress() 
 { 
    return mSenderEndpoint.address(); 
@@ -102,19 +102,19 @@ AsyncUdpSocketBase::getSenderEndpointPort()
 }
 
 void 
-AsyncUdpSocketBase::transportSend(const StunTuple& destination, std::vector<asio::const_buffer>& buffers)
+AsyncUdpSocketBase::transportSend(const StunTuple& destination, std::vector<boost::asio::const_buffer>& buffers)
 {
    //InfoLog(<< "AsyncUdpSocketBase::transportSend " << buffers.size() << " buffer(s) to " << destination << " - buf1 size=" << buffer_size(buffers.front()));
    mSocket.async_send_to(buffers, 
-                         asio::ip::udp::endpoint(destination.getAddress(), destination.getPort()), 
-                         boost::bind(&AsyncUdpSocketBase::handleSend, shared_from_this(), asio::placeholders::error));
+		   boost::asio::ip::udp::endpoint(destination.getAddress(), destination.getPort()),
+                         boost::bind(&AsyncUdpSocketBase::handleSend, shared_from_this(), boost::asio::placeholders::error));
 }
 
 void 
 AsyncUdpSocketBase::transportReceive()
 {
-   mSocket.async_receive_from(asio::buffer((void*)mReceiveBuffer->data(), RECEIVE_BUFFER_SIZE), mSenderEndpoint,
-               boost::bind(&AsyncUdpSocketBase::handleReceive, shared_from_this(), asio::placeholders::error, asio::placeholders::bytes_transferred));
+   mSocket.async_receive_from(boost::asio::buffer((void*)mReceiveBuffer->data(), RECEIVE_BUFFER_SIZE), mSenderEndpoint,
+               boost::bind(&AsyncUdpSocketBase::handleReceive, shared_from_this(), boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
 }
 
 void 
@@ -132,7 +132,7 @@ AsyncUdpSocketBase::transportClose()
       mOnBeforeSocketCloseFp((unsigned int)mSocket.native());
    }
 
-   asio::error_code ec;
+   boost::system::error_code ec;
    mSocket.close(ec);
 }
 

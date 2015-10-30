@@ -94,7 +94,8 @@ class InviteSessionHandler
          LocalCancel,
          RemoteCancel,
          Rejected, //Only as UAS, UAC has distinct onFailure callback
-         Referred
+         Referred,
+		 PaymentRequired
       };
             
       virtual void onTerminated(InviteSessionHandle, InviteSessionHandler::TerminatedReason reason, const SipMessage* related=0)=0;

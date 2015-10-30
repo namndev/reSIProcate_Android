@@ -22,7 +22,7 @@ using namespace std;
 
 #define RESIPROCATE_SUBSYSTEM FlowManagerSubsystem::FLOWMANAGER
 
-FlowDtlsSocketContext::FlowDtlsSocketContext(Flow& flow, const asio::ip::address& address, unsigned short port) 
+FlowDtlsSocketContext::FlowDtlsSocketContext(Flow& flow, const boost::asio::ip::address& address, unsigned short port)
    : mFlow(flow), mAddress(address), mPort(port), mSrtpInitialized(false)
 {
 }

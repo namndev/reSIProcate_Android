@@ -16,11 +16,7 @@
 #include <rutil/SharedPtr.hxx>
 #include <rutil/Timer.hxx>
 
-#ifdef WIN32
 #include <srtp.h>
-#else
-#include <srtp/srtp.h>
-#endif
 
 #ifdef USE_SSL  
 #include <openssl/x509.h>
@@ -45,7 +41,7 @@ namespace flowmanager
 class IOServiceThread : public ThreadIf
 {
 public:
-   IOServiceThread(asio::io_service& ioService) : mIOService(ioService) {}
+   IOServiceThread(boost::asio::io_service& ioService) : mIOService(ioService) {}
 
    virtual ~IOServiceThread() {}
 
@@ -54,28 +50,28 @@ public:
       mIOService.run();
    }
 private:
-   asio::io_service& mIOService;
+   boost::asio::io_service& mIOService;
 };
 }
 
 FlowManager::FlowManager()
 #ifdef USE_SSL
    : 
-   mSslContext(mIOService, asio::ssl::context::tlsv1),
+   mSslContext(mIOService, boost::asio::ssl::context::tlsv1),
    mClientCert(0),
-   mClientKey(0),
-   mDtlsFactory(0)
+   mClientKey(0)
+//   mDtlsFactory(0)
 #endif  
 {
-   mIOServiceWork = new asio::io_service::work(mIOService);
+   mIOServiceWork = new boost::asio::io_service::work(mIOService);
    mIOServiceThread = new IOServiceThread(mIOService);
    mIOServiceThread->run();
 
 #ifdef USE_SSL
    // Setup SSL context
-   asio::error_code ec; 
-   mSslContext.set_verify_mode(asio::ssl::context::verify_peer | 
-                               asio::ssl::context::verify_fail_if_no_peer_cert);
+   boost::system::error_code ec;
+   mSslContext.set_verify_mode(boost::asio::ssl::context::verify_peer |
+		   boost::asio::ssl::context::verify_fail_if_no_peer_cert);
 #define VERIFY_FILE "ca.pem"
    mSslContext.load_verify_file(VERIFY_FILE, ec);   // TODO make a setting
    if(ec)
@@ -102,13 +98,13 @@ FlowManager::~FlowManager()
    delete mIOServiceThread;
  
  #ifdef USE_SSL
-   if(mDtlsFactory) delete mDtlsFactory;
+  // if(mDtlsFactory) delete mDtlsFactory;
    if(mClientCert) X509_free(mClientCert);
    if(mClientKey) EVP_PKEY_free(mClientKey);
  #endif 
 }
 
-#ifdef USE_SSL
+#if 0 //#ifdef USE_SSL
 void 
 FlowManager::initializeDtlsFactory(const char* certAor)
 {
@@ -174,7 +170,7 @@ FlowManager::createMediaStream(MediaStreamHandler& mediaStreamHandler,
                                        mediaStreamHandler,
                                        localBinding,
                                        localRtcpBinding,
-#ifdef USE_SSL
+#if 0//#ifdef USE_SSL
                                        mDtlsFactory,
 #endif 
                                        natTraversalMode,
@@ -193,7 +189,7 @@ FlowManager::createMediaStream(MediaStreamHandler& mediaStreamHandler,
                                        mediaStreamHandler, 
                                        localBinding, 
                                        rtcpDisabled, 
-#ifdef USE_SSL
+#if 0//#ifdef USE_SSL
                                        mDtlsFactory,
 #endif 
                                        natTraversalMode, 

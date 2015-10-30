@@ -11,7 +11,7 @@ using namespace std;
 
 namespace reTurn {
 
-TurnManager::TurnManager(asio::io_service& ioService, const ReTurnConfig& config) : 
+TurnManager::TurnManager(boost::asio::io_service& ioService, const ReTurnConfig& config) :
    mLastAllocatedUdpPort(config.mAllocationPortRangeMin-1),
    mLastAllocatedTcpPort(config.mAllocationPortRangeMin-1),
    mIOService(ioService),

@@ -36,9 +36,9 @@ ReTurnConfig::ReTurnConfig() :
    mTurnPort(3478),
    mTlsTurnPort(5349),
    mAltStunPort(0), // Note:  The default is to disable RFC3489 binding support
-   mTurnAddress(asio::ip::address::from_string("0.0.0.0")),
-   mTurnV6Address(asio::ip::address::from_string("::0")),
-   mAltStunAddress(asio::ip::address::from_string("0.0.0.0")),
+   mTurnAddress(boost::asio::ip::address::from_string("0.0.0.0")),
+   mTurnV6Address(boost::asio::ip::address::from_string("::0")),
+   mAltStunAddress(boost::asio::ip::address::from_string("0.0.0.0")),
    mAuthenticationRealm("reTurn"),
    mUserDatabaseCheckInterval(60),
    mNonceLifetime(3600),            // 1 hour - at least 1 hours is recommended by the RFC
@@ -74,9 +74,9 @@ void ReTurnConfig::parseConfig(int argc, char** argv, const resip::Data& default
    mTurnPort = getConfigUnsignedShort("TurnPort", mTurnPort);
    mTlsTurnPort = getConfigUnsignedShort("TlsTurnPort", mTlsTurnPort);
    mAltStunPort = getConfigUnsignedShort("AltStunPort", mAltStunPort);
-   mTurnAddress = asio::ip::address::from_string(getConfigData("TurnAddress", "0.0.0.0").c_str());
-   mTurnV6Address = asio::ip::address::from_string(getConfigData("TurnV6Address", "::0").c_str());
-   mAltStunAddress = asio::ip::address::from_string(getConfigData("AltStunAddress", "0.0.0.0").c_str());
+   mTurnAddress = boost::asio::ip::address::from_string(getConfigData("TurnAddress", "0.0.0.0").c_str());
+   mTurnV6Address = boost::asio::ip::address::from_string(getConfigData("TurnV6Address", "::0").c_str());
+   mAltStunAddress = boost::asio::ip::address::from_string(getConfigData("AltStunAddress", "0.0.0.0").c_str());
    mAuthenticationRealm = getConfigData("AuthenticationRealm", mAuthenticationRealm);
    mUserDatabaseCheckInterval = getConfigUnsignedShort("UserDatabaseCheckInterval", 60);
    mNonceLifetime = getConfigUnsignedLong("NonceLifetime", mNonceLifetime);
@@ -349,7 +349,7 @@ ReTurnConfig::getUser(const resip::Data& userName, const resip::Data& realm) con
 
 bool ReTurnUserFileScanner::mHup = false;
 
-ReTurnUserFileScanner::ReTurnUserFileScanner(asio::io_service& ioService, ReTurnConfig& reTurnConfig)
+ReTurnUserFileScanner::ReTurnUserFileScanner(boost::asio::io_service& ioService, ReTurnConfig& reTurnConfig)
  : mLoadedTime(time(0)),
    mReTurnConfig(reTurnConfig),
    mLoopInterval(3),
@@ -373,7 +373,7 @@ ReTurnUserFileScanner::start()
    if(timerInterval > 0)
    {
       mTimer.expires_from_now(boost::posix_time::seconds(timerInterval));
-      mTimer.async_wait(boost::bind(&ReTurnUserFileScanner::timeout, this, asio::placeholders::error));
+      mTimer.async_wait(boost::bind(&ReTurnUserFileScanner::timeout, this, boost::asio::placeholders::error));
    }
 }
 
@@ -402,7 +402,7 @@ ReTurnUserFileScanner::hasUserFileChanged()
 }
 
 void
-ReTurnUserFileScanner::timeout(const asio::error_code& e)
+ReTurnUserFileScanner::timeout(const boost::system::error_code& e)
 {
    bool mustReload = mHup;
 

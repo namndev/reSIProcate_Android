@@ -20,7 +20,7 @@ class UdpRelayServer
 {
 public:
    /// Create the server to listen on the specified UDP address and port
-   explicit UdpRelayServer(asio::io_service& ioService, TurnAllocation& turnAllocation);
+   explicit UdpRelayServer(boost::asio::io_service& ioService, TurnAllocation& turnAllocation);
    ~UdpRelayServer();
 
    /// Starts processing
@@ -31,17 +31,17 @@ public:
 
 private:
    /// Handle completion of a receive_from operation
-   virtual void onReceiveSuccess(const asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data);
-   virtual void onReceiveFailure(const asio::error_code& e);
+   virtual void onReceiveSuccess(const boost::asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data);
+   virtual void onReceiveFailure(const boost::system::error_code& e);
 
    /// Handle completion of a send operation
    virtual void onSendSuccess();
-   virtual void onSendFailure(const asio::error_code& e);
+   virtual void onSendFailure(const boost::system::error_code& e);
 
    TurnAllocation& mTurnAllocation;
    bool mStopping;
    bool mBindSuccess;
-   asio::error_code mLastSendErrorCode;  // Use to ensure we only log at Warning level once for a particular send error
+   boost::system::error_code mLastSendErrorCode;  // Use to ensure we only log at Warning level once for a particular send error
 };
 
 typedef boost::shared_ptr<UdpRelayServer> UdpRelayServerPtr;

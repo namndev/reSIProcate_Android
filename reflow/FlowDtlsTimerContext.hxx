@@ -21,13 +21,13 @@ namespace flowmanager
 class FlowDtlsTimerContext: public dtls::DtlsTimerContext
 {
   public:
-     FlowDtlsTimerContext(asio::io_service& ioService);
+     FlowDtlsTimerContext(boost::asio::io_service& ioService);
      void addTimer(dtls::DtlsTimer *timer, unsigned int durationMs);
-     void handleTimeout(dtls::DtlsTimer *timer, const asio::error_code& errorCode);
+     void handleTimeout(dtls::DtlsTimer *timer, const boost::system::error_code& errorCode);
 
    private:
-     asio::io_service& mIOService;
-     std::map<dtls::DtlsTimer*, resip::SharedPtr<asio::deadline_timer> > mDeadlineTimers;  
+     boost::asio::io_service& mIOService;
+     std::map<dtls::DtlsTimer*, resip::SharedPtr<boost::asio::deadline_timer> > mDeadlineTimers;
 };
 
 }

@@ -13,9 +13,9 @@ using namespace std;
 
 namespace reTurn {
 
-TurnAsyncUdpSocket::TurnAsyncUdpSocket(asio::io_service& ioService,
+TurnAsyncUdpSocket::TurnAsyncUdpSocket(boost::asio::io_service& ioService,
                                        TurnAsyncSocketHandler* turnAsyncSocketHandler,
-                                       const asio::ip::address& address, 
+                                       const boost::asio::ip::address& address,
                                        unsigned short port) : 
    TurnAsyncSocket(ioService, *this, turnAsyncSocketHandler, address, port),
    AsyncUdpSocketBase(ioService)
@@ -32,20 +32,20 @@ TurnAsyncUdpSocket::onConnectSuccess()
 }
 
 void 
-TurnAsyncUdpSocket::onConnectFailure(const asio::error_code& e)
+TurnAsyncUdpSocket::onConnectFailure(const boost::system::error_code& e)
 {
    if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onConnectFailure(getSocketDescriptor(), e);
 }
 
 void 
-TurnAsyncUdpSocket::onReceiveSuccess(const asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
+TurnAsyncUdpSocket::onReceiveSuccess(const boost::asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
 {
    handleReceivedData(address, port, data);
    turnReceive();
 }
 
 void 
-TurnAsyncUdpSocket::onReceiveFailure(const asio::error_code& e)
+TurnAsyncUdpSocket::onReceiveFailure(const boost::system::error_code& e)
 {
    if (e.value() == 234) // ?jjg? ERROR_MORE_DATA -- is this right on all platforms?
    {
@@ -64,7 +64,7 @@ TurnAsyncUdpSocket::onSendSuccess()
 }
  
 void 
-TurnAsyncUdpSocket::onSendFailure(const asio::error_code& e)
+TurnAsyncUdpSocket::onSendFailure(const boost::system::error_code& e)
 {
    if(mTurnAsyncSocketHandler) mTurnAsyncSocketHandler->onSendFailure(getSocketDescriptor(), e);
 }

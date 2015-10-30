@@ -9,11 +9,7 @@
 #ifdef USE_SSL
 #include <asio/ssl.hpp>
 #endif
-#ifdef WIN32
 #include <srtp.h>
-#else
-#include <srtp/srtp.h>
-#endif
 
 #include "dtls_wrapper/DtlsSocket.hxx"
 #include "Flow.hxx"
@@ -33,7 +29,7 @@ namespace flowmanager
 class FlowDtlsSocketContext : public dtls::DtlsSocketContext
 {
 public:
-   FlowDtlsSocketContext(Flow& flow, const asio::ip::address& address, unsigned short port);
+   FlowDtlsSocketContext(Flow& flow, const boost::asio::ip::address& address, unsigned short port);
    virtual ~FlowDtlsSocketContext();
 
    // DtlsSocketContext Virtual Fns
@@ -51,7 +47,7 @@ public:
 
 private:   
    Flow& mFlow;
-   asio::ip::address mAddress;
+   boost::asio::ip::address mAddress;
    unsigned short mPort;
    srtp_policy_t mSRTPPolicyIn;
    srtp_policy_t mSRTPPolicyOut;

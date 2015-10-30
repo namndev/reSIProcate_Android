@@ -26,7 +26,7 @@ public:
    TurnAllocation* findTurnAllocation(const TurnAllocationKey& turnAllocationKey);
    TurnAllocation* findTurnAllocation(const StunTuple& requestedTuple);
 
-   void allocationExpired(const asio::error_code& e, const TurnAllocationKey& turnAllocationKey);
+   void allocationExpired(const boost::system::error_code& e, const TurnAllocationKey& turnAllocationKey);
 
 private:
    typedef std::map<TurnAllocationKey, TurnAllocation*> TurnAllocationMap;  // .slg. consider using hash table

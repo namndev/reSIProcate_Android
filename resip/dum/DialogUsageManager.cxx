@@ -305,7 +305,7 @@ void DialogUsageManager::setAppDialogSetFactory(std::auto_ptr<AppDialogSetFactor
 SharedPtr<MasterProfile>&
 DialogUsageManager::getMasterProfile()
 {
-   resip_assert(mMasterProfile.get());
+//   resip_assert(mMasterProfile.get());
    return mMasterProfile;
 }
 

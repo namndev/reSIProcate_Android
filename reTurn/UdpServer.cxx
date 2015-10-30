@@ -12,18 +12,18 @@ using namespace resip;
 
 namespace reTurn {
 
-UdpServer::UdpServer(asio::io_service& ioService, RequestHandler& requestHandler, const asio::ip::address& address, unsigned short port)
+UdpServer::UdpServer(boost::asio::io_service& ioService, RequestHandler& requestHandler, const boost::asio::ip::address& address, unsigned short port)
 : AsyncUdpSocketBase(ioService),
   mRequestHandler(requestHandler),
   mAlternatePortUdpServer(0),
   mAlternateIpUdpServer(0),
   mAlternateIpPortUdpServer(0)
 {
-   asio::error_code ec = bind(address, port);
+	boost::system::error_code ec = bind(address, port);
    if(ec)
    {
       ErrLog(<< "Unable to start UdpServer listening on " << address.to_string() << ":" << port << ", error=" << ec.value() << " - " << ec.message());
-      throw asio::system_error(ec);
+      throw boost::system::system_error(ec);
    }
    else
    {
@@ -44,7 +44,7 @@ UdpServer::~UdpServer()
 void 
 UdpServer::start()
 {
-   asio::error_code ec;
+   boost::system::error_code ec;
    mLocalAddress = mSocket.local_endpoint(ec).address();
    mLocalPort = mSocket.local_endpoint(ec).port();
    doReceive();
@@ -67,14 +67,14 @@ UdpServer::isRFC3489BackwardsCompatServer()
    return mAlternatePortUdpServer != 0;  // Just check that any of the alternate servers is populated - if so, we are running in back compat mode
 }
 
-asio::ip::udp::socket& 
+boost::asio::ip::udp::socket&
 UdpServer::getSocket()
 {
    return mSocket;
 }
 
 void 
-UdpServer::onReceiveSuccess(const asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
+UdpServer::onReceiveSuccess(const boost::asio::ip::address& address, unsigned short port, boost::shared_ptr<DataBuffer>& data)
 {
    if (data->size() > 4)
    {
@@ -179,9 +179,9 @@ UdpServer::onReceiveSuccess(const asio::ip::address& address, unsigned short por
 }
 
 void 
-UdpServer::onReceiveFailure(const asio::error_code& e)
+UdpServer::onReceiveFailure(const boost::system::error_code& e)
 {
-   if(e != asio::error::operation_aborted)
+   if(e != boost::asio::error::operation_aborted)
    {
       InfoLog(<< "UdpServer::onReceiveFailure: " << e.value() << "-" << e.message());
 
@@ -195,9 +195,9 @@ UdpServer::onSendSuccess()
 }
 
 void
-UdpServer::onSendFailure(const asio::error_code& error)
+UdpServer::onSendFailure(const boost::system::error_code& error)
 {
-   if(error != asio::error::operation_aborted)
+   if(error != boost::asio::error::operation_aborted)
    {
       InfoLog(<< "UdpServer::onSendFailure: " << error.value() << "-" << error.message());
    }
@@ -210,7 +210,7 @@ UdpServer::ResponseEntry::ResponseEntry(UdpServer* requestUdpServer, UdpServer* 
 {
    // start timer
    mCleanupTimer.expires_from_now(boost::posix_time::seconds(10));  // Transaction Responses are cached for 10 seconds
-   mCleanupTimer.async_wait(boost::bind(&UdpServer::cleanupResponseMap, requestUdpServer, asio::placeholders::error, responseMessage->mHeader.magicCookieAndTid));
+   mCleanupTimer.async_wait(boost::bind(&UdpServer::cleanupResponseMap, requestUdpServer, boost::asio::placeholders::error, responseMessage->mHeader.magicCookieAndTid));
 }
 
 UdpServer::ResponseEntry::~ResponseEntry() 
@@ -219,7 +219,7 @@ UdpServer::ResponseEntry::~ResponseEntry()
 }
 
 void 
-UdpServer::cleanupResponseMap(const asio::error_code& e, UInt128 tid)
+UdpServer::cleanupResponseMap(const boost::system::error_code& e, UInt128 tid)
 {
    ResponseMap::iterator it = mResponseMap.find(tid);
    if(it != mResponseMap.end())
