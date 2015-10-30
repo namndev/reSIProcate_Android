@@ -1,4 +1,3 @@
-# Copyright (c) 2011 Sirocco Mobile Sp. z o.o.
 
 LOCAL_PATH := $(call my-dir)
 SRC_PATH := $(LOCAL_PATH)
