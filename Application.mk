@@ -1,5 +1,3 @@
-# Copyright (c) 2011 Sirocco Mobile Sp. z o.o.
-# Copyright (c) 2013 Redefine Sp. z o.o.
 # APP_PLATFORM since android-9 support x86 (all32)
 # APP_PLATFORM since android-21 support 64bit (all32 and all64)
 APP_PLATFORM := android-9
